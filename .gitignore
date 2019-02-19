@@ -1,3 +1,7 @@
+secrets.yml
+.serverless
+venv
+
 # Logs
 logs
 *.log
