@@ -1,6 +1,9 @@
 secrets.yml
 .serverless
 venv
+dbcreds.json
+apiKey.json
+.DS_Store
 
 # Logs
 logs
