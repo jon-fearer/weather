@@ -1,3 +1,2 @@
 # weather
-An AWS Lambda function for daily weather updates via text, email, etc...
-Originally written in python, then re-written in node
+An AWS Lambda function for daily weather updates via text, email, etc..
