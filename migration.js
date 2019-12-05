@@ -1,4 +1,5 @@
 var mysql = require('mysql');
+var dateformat = require('dateformat');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const fs = require('fs');
 var AWS = require('aws-sdk');
@@ -23,7 +24,9 @@ connection.query('select * from DailyWeather;', function (error, results, fields
 
 async function processData(record) {
     var s3 = new AWS.S3();
-    var fileName = `denver-weather-${record.Rundate.toISOString()}.csv`;
+    const fileDf = 'yyyy-mm-dd';
+    const dataDf = 'yyyy-mm-dd HH:MM:ss';
+    var fileName = `denver-weather-${dateformat(record.Rundate, fileDf)}.csv`;
     var csvWriter = createCsvWriter({
         path: './'+fileName,
         header: [
@@ -37,7 +40,7 @@ async function processData(record) {
     });
     var singleRecord = [
         {pk: record.DailyWeatherId,
-         rd: record.Rundate.toISOString(),
+         rd: dateformat(record.Rundate, dataDf),
          city: record.City,
          temp: record.Temperature,
          desc: record.Description,

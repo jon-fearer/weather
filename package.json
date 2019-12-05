@@ -14,9 +14,10 @@
   "dependencies": {
     "aws-sdk": "^2.405.0",
     "csv-writer": "^1.2.0",
+    "dateformat": "^3.0.3",
     "mysql": "^2.16.0",
     "request": "^2.88.0",
-    "serverless": "^1.38.0",
+    "serverless": "^1.59.0",
     "serverless-python-requirements": "^3.3.0"
   },
   "devDependencies": {

@@ -1,4 +1,5 @@
 var AWS = require('aws-sdk');
+var dateformat = require('dateformat');
 AWS.config.update({region:'us-east-1'});
 const request = require('request');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
@@ -60,40 +61,6 @@ var useData = function(data) {
     }
   });
 
-  const ts = new Date().toISOString();
-  const fileName = `denver-weather-${ts}.csv`;
-  const csvWriter = createCsvWriter({
-      path: `${process.env.tmpLoc}${fileName}`,
-      header: [
-        {id: 'pk', title: 'DailyWeatherId'},
-        {id: 'rd', title: 'RunDate'},
-        {id: 'city', title: 'City'},
-        {id: 'temp', title: 'Temperature'},
-        {id: 'desc', title: 'Description'},
-        {id: 'ws', title: 'WindSpeed'}
-      ]
-  });
-
-  const records = [
-      {pk: -1,
-       rd: ts,
-       city: 'Denver',
-       temp: data[0],
-       desc: data[1],
-       ws: data[2]}
-  ];
-
-  csvWriter.writeRecords(records)
-      .then(() => {
-          var s3 = new AWS.S3();
-          const stream = fs.createReadStream(csvWriter._path);
-          var params = {Bucket: 'weather-denver',
-                        Key: `dev/${fileName}`,
-                        Body: stream};
-          s3.upload(params, function(err, data) {
-            console.log(err, data);
-          });
-      });
 };
 
 

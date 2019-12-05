@@ -1,12 +1,5 @@
 service: weather
 
-# provider:
-#   name: aws
-#   runtime: python3.6
-#   environment:
-#     apiKey: "${self:custom.secrets.dev.apikey}"
-#     tmpLoc: "/tmp/"
-
 provider:
   name: aws
   runtime: nodejs8.10
@@ -18,22 +11,30 @@ provider:
          - "s3:PutObjectAcl"
        Resource:
          - "arn:aws:s3:::weather-denver/*"
+    -  Effect: "Allow"
+       Action:
+         - "SNS:Publish"
+       Resource:
+         - "arn:aws:sns:us-east-1:528165410097:Weather"
   environment:
     apiKey: "${self:custom.secrets.dev.apikey}"
     tmpLoc: "/tmp/"
 
 functions:
-  weather:
-    handler: handler.lambdaHandler
+  weatherNotifier:
+    handler: handlerNotifier.lambdaHandler
     events:
       - schedule:
           rate: cron(0 7 * * ? *)
           timezone: America/Denver
+  weatherDataOnly:
+    handler: handlerDataOnly.lambdaHandler
+    events:
+      - schedule:
+          rate: cron(0 * * * ? *)
+          timezone: America/Denver
 
 plugins:
-  # - serverless-python-requirements
   - serverless-local-schedule
 custom:
-  # pythonRequirements:
-  #   dockerizePip: non-linux
   secrets: ${file(secrets.yml)}
