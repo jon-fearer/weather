@@ -30,9 +30,7 @@ const getWeatherData = () => {
 };
 
 
-const sendNotification = (data) => {
-  const sns = new AWS.SNS({ region: process.env.PRIMARY_REGION });
-
+const sendNotification = (sns, data) => {
   const message = `Right now in Denver it's ${data[0]}°F and ${data[1]}, `
                 + `with winds of ${data[2]} miles per hour. The RealFeel `
                 + `temperature is ${data[3]}°F.`;
@@ -54,7 +52,7 @@ const sendNotification = (data) => {
 };
 
 
-const persistToS3 = (data) => {
+const persistToS3 = (s3, data) => {
   const dataTs = dateformat(new Date(), 'yyyy-mm-dd HH:MM:ss', true);
 
   const fileName = `denver-weather-${dataTs}.csv`;
@@ -85,8 +83,6 @@ const persistToS3 = (data) => {
   return new Promise((resolve, reject) => {
     csvWriter.writeRecords(records)
       .then(() => {
-        const s3 = new AWS.S3({ region: process.env.PRIMARY_REGION });
-
         const stream = fs.createReadStream(csvWriter._path);
 
         const params = {
@@ -108,12 +104,18 @@ const persistToS3 = (data) => {
 
 
 const notificationHander = () => {
-  getWeatherData().then((data) => sendNotification(data));
+  getWeatherData().then((data) => sendNotification(
+    new AWS.SNS({ region: process.env.PRIMARY_REGION }),
+    data,
+  ));
 };
 
 
 const s3handler = () => {
-  getWeatherData().then((data) => persistToS3(data));
+  getWeatherData().then((data) => persistToS3(
+    new AWS.S3({ region: process.env.PRIMARY_REGION }),
+    data,
+  ));
 };
 
 

@@ -4,6 +4,7 @@ const AWS = require('aws-sdk');
 const nock = require('nock');
 const handlers = require('./handler');
 
+
 beforeAll(() => {
   nock('http://dataservice.accuweather.com', {
     reqheaders: {
@@ -37,18 +38,26 @@ beforeAll(() => {
       MobileLink: 'http://aweatherdomain.com',
     }]);
 
-  const snsMockFn = () => {};
-  const s3MockFn = () => {};
+  AWSMock.setSDKInstance(AWS);
+
+  const snsMockFn = (_params, cb) => {
+    cb(null, 'mock called');
+  };
+  const s3MockFn = (_params, cb) => {
+    cb(null, 'mock called');
+  };
 
   AWSMock.mock('SNS', 'publish', snsMockFn);
   AWSMock.mock('S3', 'upload', s3MockFn);
 });
+
 
 afterAll(() => {
   nock.restore();
   AWSMock.restore('SNS', 'publish');
   AWSMock.restore('S3', 'upload');
 });
+
 
 test('should grab mock weather data', async () => {
   const result = await handlers.getWeatherData();
@@ -59,32 +68,40 @@ test('should grab mock weather data', async () => {
   expect(result[4]).toBe('http://aweatherdomain.com');
 });
 
+
 test('should write data to sns topic', async () => {
   const sns = new AWS.SNS({ region: process.env.PRIMARY_REGION });
   const snsMock = jest.spyOn(sns, 'publish');
 
-  await handlers.sendNotification([
-    50,
-    'mostly cloudy',
-    2,
-    54,
-    'http://aweatherdomain.com',
-  ]);
+  await handlers.sendNotification(
+    sns,
+    [
+      50,
+      'mostly cloudy',
+      2,
+      54,
+      'http://aweatherdomain.com',
+    ],
+  );
 
   expect(snsMock).toHaveBeenCalledTimes(1);
 });
+
 
 test('should write data to s3', async () => {
   const s3 = new AWS.S3({ region: process.env.PRIMARY_REGION });
   const s3Mock = jest.spyOn(s3, 'upload');
 
-  await handlers.persistToS3([
-    50,
-    'mostly cloudy',
-    2,
-    54,
-    'http://aweatherdomain.com',
-  ]);
+  await handlers.persistToS3(
+    s3,
+    [
+      50,
+      'mostly cloudy',
+      2,
+      54,
+      'http://aweatherdomain.com',
+    ],
+  );
 
   expect(s3Mock).toHaveBeenCalledTimes(1);
 });
