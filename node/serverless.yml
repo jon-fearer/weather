@@ -2,7 +2,7 @@ service: weather
 
 provider:
   name: aws
-  runtime: nodejs8.10
+  runtime: nodejs12.x
   timeout: 30
   iamRoleStatements:
     -  Effect: "Allow"
@@ -17,18 +17,22 @@ provider:
        Resource:
          - "arn:aws:sns:us-east-1:528165410097:Weather"
   environment:
-    apiKey: "${self:custom.secrets.dev.apikey}"
-    tmpLoc: "/tmp/"
+    WEATHER_API_KEY: "${self:custom.secrets.dev.apikey}"
+    TMP_LOC: /tmp/
+    SNS_TOPIC_ARN: arn:aws:sns:us-east-1:528165410097:Weather
+    S3_BUCKET: weather-denver
+    PRIMARY_REGION: us-east-1
+    WEATHER_URL: http://dataservice.accuweather.com/currentconditions/v1/347810
 
 functions:
   weatherNotifier:
-    handler: handlerNotifier.lambdaHandler
+    handler: handler.notificationHander
     events:
       - schedule:
           rate: cron(0 7 * * ? *)
           timezone: America/Denver
   weatherDataOnly:
-    handler: handlerDataOnly.lambdaHandler
+    handler: handler.s3handler
     events:
       - schedule:
           rate: cron(0 * * * ? *)
@@ -36,5 +40,7 @@ functions:
 
 plugins:
   - serverless-local-schedule
+  - serverless-export-env
+
 custom:
   secrets: ${file(secrets.yml)}
