@@ -5,7 +5,8 @@
   "main": "handler.js",
   "scripts": {
     "test": "jest",
-    "exp": "serverless export-env"
+    "exp": "serverless export-env",
+    "deploy": "serverless deploy"
   },
   "keywords": [
     "Weather"
@@ -29,6 +30,7 @@
     "eslint-plugin-react": "^7.19.0",
     "eslint-plugin-react-hooks": "^2.5.0",
     "jest": "^25.1.0",
+    "mysql": "^2.18.1",
     "nock": "^12.0.2",
     "serverless": "^1.59.0",
     "serverless-export-env": "^1.2.0",
